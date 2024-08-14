@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const useAuth = () => {
   const [authState, setAuthState] = useState({
@@ -11,9 +10,8 @@ const useAuth = () => {
   });
 
   useEffect(() => {
-    const fetchAuthState = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/auth/auth', { withCredentials: true });
+    axios.get("http://localhost:3001/auth/auth", { withCredentials: true })
+      .then((response) => {
         if (response.data.error) {
           setAuthState({
             isAuthenticated: false,
@@ -22,7 +20,6 @@ const useAuth = () => {
             token: null,
           });
         } else {
-          await AsyncStorage.setItem('authToken', response.data.token);
           setAuthState({
             isAuthenticated: true,
             isLoading: false,
@@ -30,17 +27,14 @@ const useAuth = () => {
             token: response.data.token,
           });
         }
-      } catch {
+      }).catch(() => {
         setAuthState({
           isAuthenticated: false,
           isLoading: false,
           user: null,
           token: null,
         });
-      }
-    };
-
-    fetchAuthState();
+      });
   }, []);
 
   return [authState, setAuthState];

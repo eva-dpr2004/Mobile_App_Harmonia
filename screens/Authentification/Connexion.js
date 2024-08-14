@@ -53,7 +53,7 @@ function Connexion() {
           if (response.data.error) {
             Alert.alert('Erreur', response.data.error);
           } else {
-            navigation.navigate('Accueil');
+            navigation.navigate('Profil');
           }
         })
         .catch(error => {
