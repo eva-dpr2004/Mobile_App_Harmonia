@@ -5,7 +5,6 @@ import axios from 'axios';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import {
-  ConnexionContainer,
   FormContainer,
   FormBox,
   FormTitle,
@@ -15,12 +14,10 @@ import {
   Button,
   ButtonText,
   ErrorText,
-  ImgConnexion,
 } from '../../styles/FormulairesStyle';
 
-function ConnexionForm() {
+function ConnexionForm({ navigation }) {
   const [initialValues] = useState({ NomOrEmail: '', Mot_De_Passe: '' });
-  const navigation = useNavigation();
 
   const validationSchema = Yup.object().shape({
     NomOrEmail: Yup.string()
@@ -53,7 +50,7 @@ function ConnexionForm() {
           if (response.data.error) {
             Alert.alert('Erreur', response.data.error);
           } else {
-            navigation.navigate('Profile');
+            navigation.navigate('Profil');
           }
         })
         .catch(error => {
@@ -67,54 +64,51 @@ function ConnexionForm() {
   };
 
   return (
-    <ConnexionContainer>
-      <ImgConnexion source={require('../../assets/img/Vecteurs/connexion.png')} />
-      <FormContainer>
-        <FormBox>
-          <FormTitle>Connexion</FormTitle>
-          <FormLink onPress={() => navigation.navigate('Inscription')}>
-            Vous n'avez pas de compte ? cliquez ici.
-          </FormLink>
-          <Formik
-            initialValues={initialValues}
-            onSubmit={onSubmit}
-            validationSchema={validationSchema}
-          >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-              <>
-                <Label>Nom ou Email:</Label>
-                <Input
-                  onChangeText={handleChange('NomOrEmail')}
-                  onBlur={handleBlur('NomOrEmail')}
-                  value={values.NomOrEmail}
-                  placeholder="Votre nom ou email..."
-                />
-                {touched.NomOrEmail && errors.NomOrEmail && (
-                  <ErrorText>{errors.NomOrEmail}</ErrorText>
-                )}
+    <FormContainer>
+      <FormBox>
+        <FormTitle>Connexion</FormTitle>
+        <FormLink onPress={() => navigation.navigate('Inscription')}>
+          Vous n'avez pas de compte ? cliquez ici.
+        </FormLink>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={onSubmit}
+          validationSchema={validationSchema}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              <Label>Nom ou Email:</Label>
+              <Input
+                onChangeText={handleChange('NomOrEmail')}
+                onBlur={handleBlur('NomOrEmail')}
+                value={values.NomOrEmail}
+                placeholder="Votre nom ou email..."
+              />
+              {touched.NomOrEmail && errors.NomOrEmail && (
+                <ErrorText>{errors.NomOrEmail}</ErrorText>
+              )}
 
-                <Label>Mot de Passe:</Label>
-                <Input
-                  onChangeText={handleChange('Mot_De_Passe')}
-                  onBlur={handleBlur('Mot_De_Passe')}
-                  value={values.Mot_De_Passe}
-                  placeholder="Votre mot de passe..."
-                  secureTextEntry
-                />
-                {touched.Mot_De_Passe && errors.Mot_De_Passe && (
-                  <ErrorText>{errors.Mot_De_Passe}</ErrorText>
-                )}
+              <Label>Mot de Passe:</Label>
+              <Input
+                onChangeText={handleChange('Mot_De_Passe')}
+                onBlur={handleBlur('Mot_De_Passe')}
+                value={values.Mot_De_Passe}
+                placeholder="Votre mot de passe..."
+                secureTextEntry
+              />
+              {touched.Mot_De_Passe && errors.Mot_De_Passe && (
+                <ErrorText>{errors.Mot_De_Passe}</ErrorText>
+              )}
 
-                <Button onPress={handleSubmit}>
-                  <ButtonText>Login</ButtonText>
-                </Button>
-                {errors.submit && <ErrorText>{errors.submit}</ErrorText>}
-              </>
-            )}
-          </Formik>
-        </FormBox>
-      </FormContainer>
-    </ConnexionContainer>
+              <Button onPress={handleSubmit}>
+                <ButtonText>Login</ButtonText>
+              </Button>
+              {errors.submit && <ErrorText>{errors.submit}</ErrorText>}
+            </>
+          )}
+        </Formik>
+      </FormBox>
+    </FormContainer>
   );
 }
 

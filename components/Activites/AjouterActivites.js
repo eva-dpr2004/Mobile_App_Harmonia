@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { View, Text, TextInput, Button, Picker, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert, Picker } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -105,92 +105,61 @@ function AjouterActivites() {
           dureeActivite: ''
         });
         setError('');
-        Alert.alert('Succès', 'Activité ajoutée avec succès', [{ text: 'OK' }]);
+        Alert.alert('Succès', 'Activité ajoutée avec succès', [{ text: 'OK', onPress: () => window.location.reload() }]);
       } else {
         console.error('Erreur lors de l\'ajout de l\'activité');
       }
     } catch (error) {
-      setError('Erreur lors de l\'ajout de l\'activité');
+      if (error.response && error.response.status === 400) {
+        setError(error.response.data.error);
+      } else {
+        console.error('Erreur lors de l\'ajout de l\'activité', error);
+      }
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ajouter une Activité</Text>
-      {error && <Text style={styles.error}>{error}</Text>}
-      <View style={styles.formGroup}>
-        <Text>Animal:</Text>
+    <View>
+      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Activités</Text>
+      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
+      <View>
+        <Text>Animal</Text>
         <Picker
           selectedValue={activity.animalId}
           onValueChange={(value) => handleChange('animalId', value)}
-          style={styles.picker}
+          style={{ height: 50, width: 210 }}
         >
           <Picker.Item label="Sélectionner un animal" value="" />
           {animaux.map(animal => (
-            <Picker.Item key={animal.Id_Animal} label={animal.Nom} value={animal.Id_Animal.toString()} />
+            <Picker.Item key={animal.Id_Animal} label={animal.Nom} value={animal.Id_Animal} />
           ))}
         </Picker>
-      </View>
-      <View style={styles.formGroup}>
-        <Text>Date:</Text>
+
+        <Text>Date du jour</Text>
         <TextInput
           value={activity.date}
           editable={false}
-          style={styles.input}
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
         />
-      </View>
-      <View style={styles.formGroup}>
-        <Text>Début de l'activité:</Text>
+
+        <Text>Début de l'activité</Text>
         <TextInput
           value={activity.debutActivite}
           onChangeText={(value) => handleChange('debutActivite', value)}
-          style={styles.input}
-          placeholder="HH:MM"
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
         />
-      </View>
-      <View style={styles.formGroup}>
-        <Text>Fin de l'activité:</Text>
+
+        <Text>Fin de l'activité</Text>
         <TextInput
           value={activity.finActivite}
           onChangeText={(value) => handleChange('finActivite', value)}
-          style={styles.input}
-          placeholder="HH:MM"
+          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
         />
+
+        <Button title="Ajouter l'Activité du jour" onPress={handleSubmit} />
       </View>
-      <Button title="Ajouter l'Activité" onPress={handleSubmit} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 20,
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  input: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
-    marginTop: 10,
-    borderRadius: 5,
-  },
-});
 
 export default AjouterActivites;

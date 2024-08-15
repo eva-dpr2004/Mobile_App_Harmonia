@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { AnimalContext } from '../../context/AnimalContext';
@@ -26,7 +26,7 @@ function ModifierAnimalForm() {
     if (selectedAnimal) {
       setAnimal(selectedAnimal);
     } else {
-      navigation.navigate('MesAnimaux');
+      navigation.navigate('MesAnimaux');  
     }
   }, [selectedAnimal, navigation]);
 
@@ -69,7 +69,7 @@ function ModifierAnimalForm() {
   const handleChange = (name, value) => {
     setAnimal((prevAnimal) => ({
       ...prevAnimal,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -90,7 +90,8 @@ function ModifierAnimalForm() {
       await axios.put(`http://localhost:3001/animals/updateAnimal/${selectedAnimal.Id_Animal}`, animal, {
         headers: {
           'Authorization': `Bearer ${authState.token}`
-        }
+        },
+        withCredentials: true
       });
       setSelectedAnimal(null);
       navigation.navigate('MesAnimaux');
@@ -100,62 +101,73 @@ function ModifierAnimalForm() {
     }
   };
 
+  if (!animal) {
+    return <Text>Loading...</Text>;
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Modifier Animal: {animal.Nom}</Text>
-      <Text>Nom:</Text>
+      
+      <Text style={styles.label}>Nom:</Text>
       <TextInput
-        style={styles.input}
         value={animal.Nom}
         onChangeText={(value) => handleChange('Nom', value)}
-      />
-      <Text>Date de Naissance:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Date de Naissance:</Text>
+      <TextInput
         value={animal.Date_De_Naissance}
         onChangeText={(value) => handleChange('Date_De_Naissance', value)}
-        placeholder="YYYY-MM-DD"
-      />
-      <Text>Date d'Adoption:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Date d'Adoption:</Text>
+      <TextInput
         value={animal.Date_Adoption}
         onChangeText={(value) => handleChange('Date_Adoption', value)}
-        placeholder="YYYY-MM-DD"
-      />
-      <Text>Espèce:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Espèce:</Text>
+      <TextInput
         value={animal.Espece}
         onChangeText={(value) => handleChange('Espece', value)}
-      />
-      <Text>Race:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Race:</Text>
+      <TextInput
         value={animal.Race}
         onChangeText={(value) => handleChange('Race', value)}
-      />
-      <Text>Sexe:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Sexe:</Text>
+      <TextInput
         value={animal.Sexe}
         onChangeText={(value) => handleChange('Sexe', value)}
-      />
-      <Text>Poids (kg):</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Poids (kg):</Text>
+      <TextInput
         value={animal.Poids}
         onChangeText={(value) => handleChange('Poids', value)}
-        keyboardType="numeric"
-      />
-      <Text>Habitat:</Text>
-      <TextInput
         style={styles.input}
+      />
+      
+      <Text style={styles.label}>Habitat:</Text>
+      <TextInput
         value={animal.Habitat}
         onChangeText={(value) => handleChange('Habitat', value)}
+        style={styles.input}
       />
+
       <Button title="Enregistrer les modifications" onPress={handleSubmit} />
-      {message && <Text style={styles.error}>{message}</Text>}
+
+      {message ? <Text style={styles.error}>{message}</Text> : null}
     </View>
   );
 }
@@ -163,24 +175,26 @@ function ModifierAnimalForm() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#fff',
-    flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
   },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
   input: {
-    borderColor: '#ccc',
+    height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
+    marginBottom: 15,
+    paddingLeft: 10,
   },
   error: {
     color: 'red',
-    fontSize: 12,
+    marginTop: 10,
   },
 });
 

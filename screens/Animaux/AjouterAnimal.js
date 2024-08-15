@@ -115,7 +115,7 @@ export default function AjouterAnimal() {
   };
 
   const navigateToList = () => {
-    navigation.navigate('ListeAnimaux');
+    navigation.navigate('TypesAnimaux');
   };
 
   return (

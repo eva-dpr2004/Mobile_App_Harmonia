@@ -12,8 +12,10 @@ import Profil from './screens/Profil/Profil';
 import ModifierProfil from './screens/Profil/ModifierProfil';
 import SupprimerProfil from './screens/Profil/SupprimerProfil';
 import AjouterAnimal from './screens/Animaux/AjouterAnimal';
-import MesAnimaux from './screens/Animaux/MesAnimaux';
+import TypesAnimaux from './screens/Animaux/TypesAnimaux';
 import ModifierAnimal from './screens/Animaux/ModifierAnimal';
+import MesAnimaux from './screens/Animaux/MesAnimaux';
+import Activites from './screens/Activites/Activites';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +38,8 @@ export default function App() {
               <Stack.Screen name="AjouterAnimal" component={AjouterAnimal} options={{ title: 'Ajouter Animal' }} />
               <Stack.Screen name="MesAnimaux" component={MesAnimaux} options={{ title: 'Mes Animaux' }} />
               <Stack.Screen name="ModifierAnimal" component={ModifierAnimal} options={{ title: 'Modifier Animal' }} />
+              <Stack.Screen name="TypesAnimaux" component={TypesAnimaux} options={{ title: 'Types Animaux' }} />
+              <Stack.Screen name="Activites" component={Activites} options={{ title: 'Activités' }} />
             </>
           ) : null}
         </Stack.Navigator>

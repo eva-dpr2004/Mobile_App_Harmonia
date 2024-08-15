@@ -2,24 +2,31 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
 function AucunAnimal() {
+  const noAnimalImage = require('../../assets/img/dog-cat.png'); // Local image
+
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/img/dog-cat.png')} style={styles.image} />
-      <Text>Aucun animal pour le moment.</Text>
+      <Image source={noAnimalImage} style={styles.image} />
+      <Text style={styles.text}>Aucun animal pour le moment.</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
+    padding: 20,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     marginBottom: 20,
+  },
+  text: {
+    fontSize: 18,
+    color: 'gray',
   },
 });
 

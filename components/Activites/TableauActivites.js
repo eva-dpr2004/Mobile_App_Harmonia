@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { View, Text, Button, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList, Alert, Picker } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -7,6 +7,8 @@ function TableauActivites() {
   const { authState } = useContext(AuthContext);
   const [activities, setActivities] = useState([]);
   const [selectedAnimal, setSelectedAnimal] = useState('');
+  const [showCard, setShowCard] = useState(false);
+  const [showWeeklyCard, setShowWeeklyCard] = useState(false);
   const [totalTime, setTotalTime] = useState(0);
   const [totalWeeklyTime, setTotalWeeklyTime] = useState(0);
 
@@ -29,28 +31,30 @@ function TableauActivites() {
 
   const handleDelete = (id) => {
     Alert.alert(
-      'Confirmation',
-      'Suppression de l\'activité ? Appuyez sur OK pour confirmer.',
+      'Suppression de l\'activité',
+      'Appuyer sur OK pour confirmer',
       [
         { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: () => {
-            axios.delete(`http://localhost:3001/activities/deleteActivites/${id}`, { withCredentials: true })
-              .then(() => {
-                fetchActivities();
-              })
-              .catch(error => {
-                console.error('Erreur lors de la suppression de l\'activité:', error);
-              });
-          },
-        },
-      ],
+        { text: 'OK', onPress: () => deleteActivity(id) }
+      ]
     );
   };
 
-  const handleAnimalChange = (animal) => {
-    setSelectedAnimal(animal);
+  const deleteActivity = (id) => {
+    axios.delete(`http://localhost:3001/activities/deleteActivites/${id}`, { withCredentials: true })
+      .then((response) => {
+        console.log('Réponse de suppression:', response);
+        fetchActivities();
+      })
+      .catch(error => {
+        console.error('Erreur lors de la suppression de l\'activité:', error);
+      });
+  };
+
+  const handleAnimalChange = (value) => {
+    setSelectedAnimal(value);
+    setShowCard(false);
+    setShowWeeklyCard(false);
   };
 
   const animalsWithActivities = [...new Set(activities.map(activity => activity.Nom_Animal))];
@@ -66,6 +70,8 @@ function TableauActivites() {
   weekAgo.setDate(weekAgo.getDate() - 7);
   const lastWeekActivities = filteredActivities.filter(activity => new Date(activity.Date) > weekAgo);
 
+  const hasEnoughActivities = todaysActivities.length >= 2;
+
   const convertMinutesToHoursAndMinutes = (minutes) => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
@@ -80,6 +86,7 @@ function TableauActivites() {
       return total + (hours * 60) + minutes;
     }, 0);
     setTotalTime(totalMinutes);
+    setShowCard(true);
   };
 
   const calculateTotalWeeklyTime = () => {
@@ -90,26 +97,36 @@ function TableauActivites() {
       return total + (hours * 60) + minutes;
     }, 0);
     setTotalWeeklyTime(totalMinutes);
+    setShowWeeklyCard(true);
+  };
+
+  const checkWeeklyActivities = () => {
+    const daysWithActivities = new Set(lastWeekActivities.map(activity => activity.Date));
+    return daysWithActivities.size >= 1; 
   };
 
   return (
     <View style={styles.container}>
       {activities.length > 0 ? (
-        <>
+        <View>
           <Text style={styles.title}>Tableau des Activités</Text>
           <Picker
             selectedValue={selectedAnimal}
-            onValueChange={(value) => handleAnimalChange(value)}
             style={styles.picker}
+            onValueChange={(itemValue) => handleAnimalChange(itemValue)}
           >
-            <Picker.Item label="Sélectionner un animal" value="" />
+            <Picker.Item label="Aucun" value="" />
             {animalsWithActivities.map((animal, index) => (
               <Picker.Item key={index} label={animal} value={animal} />
             ))}
           </Picker>
+
           <FlatList
             data={filteredActivities}
-            keyExtractor={(item) => item.Id_Activite.toString()}
+            keyExtractor={item => item.Id_Activite.toString()}
+            ListEmptyComponent={() => (
+              <Text style={styles.noData}>Sélectionnez un animal pour voir ses activités.</Text>
+            )}
             renderItem={({ item }) => (
               <View style={styles.activityRow}>
                 <Text>{item.Nom_Animal}</Text>
@@ -117,34 +134,34 @@ function TableauActivites() {
                 <Text>{item.Debut_Activite}</Text>
                 <Text>{item.Fin_Activite}</Text>
                 <Text>{item.Duree_Activite}</Text>
-                <TouchableOpacity onPress={() => handleDelete(item.Id_Activite)}>
-                  <Text style={styles.deleteIcon}>🗑️</Text>
-                </TouchableOpacity>
+                <Button title="Supprimer" onPress={() => handleDelete(item.Id_Activite)} />
               </View>
             )}
-            ListEmptyComponent={<Text>Sélectionnez un animal pour voir ses activités.</Text>}
           />
+
           <View style={styles.buttonContainer}>
-            {todaysActivities.length >= 2 && (
+            {hasEnoughActivities && (
               <Button title="Calculer la durée totale quotidienne" onPress={calculateTotalTime} />
             )}
-            {lastWeekActivities.length >= 1 && (
+            {checkWeeklyActivities() && (
               <Button title="Calculer la durée totale des 7 derniers jours" onPress={calculateTotalWeeklyTime} />
             )}
           </View>
-          {totalTime > 0 && (
+
+          {showCard && (
             <View style={styles.card}>
-              <Text>Total de temps d'activité pour aujourd'hui</Text>
+              <Text style={styles.cardTitle}>Total de temps d'activité pour aujourd'hui</Text>
               <Text>{convertMinutesToHoursAndMinutes(totalTime)} aujourd'hui</Text>
             </View>
           )}
-          {totalWeeklyTime > 0 && (
+
+          {showWeeklyCard && (
             <View style={styles.card}>
-              <Text>Total de temps d'activité pour les 7 derniers jours</Text>
+              <Text style={styles.cardTitle}>Total de temps d'activité pour les 7 derniers jours</Text>
               <Text>{convertMinutesToHoursAndMinutes(totalWeeklyTime)} cette semaine</Text>
             </View>
           )}
-        </>
+        </View>
       ) : (
         <Text>Aucune activité enregistrée pour vos animaux.</Text>
       )}
@@ -154,19 +171,21 @@ function TableauActivites() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
     flex: 1,
+    padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 20,
   },
   picker: {
-    marginBottom: 20,
     height: 50,
     width: '100%',
+    marginBottom: 20,
+  },
+  noData: {
+    textAlign: 'center',
+    marginVertical: 20,
   },
   activityRow: {
     flexDirection: 'row',
@@ -175,17 +194,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
-  deleteIcon: {
-    color: 'red',
-  },
   buttonContainer: {
-    marginTop: 20,
+    marginVertical: 20,
   },
   card: {
-    backgroundColor: '#f9f9f9',
     padding: 20,
-    marginTop: 20,
+    backgroundColor: '#f0f0f0',
     borderRadius: 10,
+    marginVertical: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
 

@@ -1,24 +1,17 @@
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { Button, View, StyleSheet } from 'react-native';
 
-function BoutonAjouterAnimal() {
-  const navigation = useNavigation();
-
-  const redirectToAddAnimal = () => {
-    navigation.navigate('AjouterAnimal');
-  };
-
+function BoutonAjouterAnimal({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Button title="Ajouter un Animal" onPress={redirectToAddAnimal} />
+    <View style={styles.buttonContainer}>
+      <Button title="Ajouter un Animal" onPress={() => navigation.navigate('AjouterAnimal')} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
+  buttonContainer: {
+    marginVertical: 20,
   },
 });
 

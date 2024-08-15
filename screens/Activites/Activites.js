@@ -1,13 +1,23 @@
 import React from 'react';
-import { View} from 'react-native';
-import Navbar from '../../components/Basics/Navbar';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import AjouterActivites from '../../components/Activites/AjouterActivites'; 
+import TableauActivites from '../../components/Activites/TableauActivites'; 
 
 const Activites = () => {
   return (
-    <View style={styles.container}>
-      <Navbar />
-    </View>
+    <ScrollView style={styles.container}>
+      <AjouterActivites />  
+      <TableauActivites />  
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+});
 
 export default Activites;
