@@ -6,6 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 import MesAnimauxList from '../../components/Animaux/MesAnimauxList';
 import BoutonAjouterAnimal from '../../components/Animaux/BoutonAjouterAnimal';
 import AucunAnimal from '../../components/Animaux/AucunAnimal';
+import TabNavigator from '../../components/Basics/TabNavigator';
 
 function MesAnimaux() {
   const { authState } = useContext(AuthContext);
@@ -52,6 +53,7 @@ function MesAnimaux() {
       )}
 
       <BoutonAjouterAnimal navigation={navigation} />
+      <TabNavigator />
     </View>
   );
 }

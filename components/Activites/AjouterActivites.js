@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { View, Text, TextInput, Button, Alert, Picker } from 'react-native';
-import axios from 'axios';
+import { View, Text, TextInput, Picker, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
+import { getAnimauxByUserId, addActivite } from '../../services/Activites';
 
 function AjouterActivites() {
   const { authState } = useContext(AuthContext);
@@ -21,16 +21,14 @@ function AjouterActivites() {
   const [animaux, setAnimaux] = useState([]);
   const [error, setError] = useState('');
 
-  const fetchAnimaux = useCallback(() => {
+  const fetchAnimaux = useCallback(async () => {
     if (authState.isAuthenticated && authState.user?.Id_Utilisateur) {
-      const url = `http://localhost:3001/animals/byUserId/${authState.user.Id_Utilisateur}`;
-      axios.get(url, { withCredentials: true })
-        .then(response => {
-          setAnimaux(response.data);
-        })
-        .catch(error => {
-          console.error('Erreur lors de la récupération des animaux:', error);
-        });
+      try {
+        const data = await getAnimauxByUserId(authState.user.Id_Utilisateur);
+        setAnimaux(data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des animaux:', error);
+      }
     }
   }, [authState]);
 
@@ -67,8 +65,8 @@ function AjouterActivites() {
     }
 
     const { debutActivite, finActivite, animalId } = activity;
-    const debutDate = new Date(`1970-01-01T${debutActivite}Z`);
-    let finDate = new Date(`1970-01-01T${finActivite}Z`);
+    const debutDate = new Date(`1970-01-01T${debutActivite}:00Z`);
+    let finDate = new Date(`1970-01-01T${finActivite}:00Z`);
     
     if (finDate < debutDate) {
       finDate.setDate(finDate.getDate() + 1);
@@ -90,13 +88,14 @@ function AjouterActivites() {
     const animalNom = selectedAnimal ? selectedAnimal.Nom : '';
 
     try {
-      const response = await axios.post('http://localhost:3001/activities/ajoutActivite', {
+      const response = await addActivite({
         ...activity,
         dureeActivite,
         animalNom
-      }, { withCredentials: true });
+      });
+
       if (response.status === 201) {
-        console.log('Activité ajoutée avec succès');
+        Alert.alert('Succès', 'Activité ajoutée avec succès');
         setActivity({
           animalId: '',
           date: getCurrentDate(),
@@ -105,61 +104,120 @@ function AjouterActivites() {
           dureeActivite: ''
         });
         setError('');
-        Alert.alert('Succès', 'Activité ajoutée avec succès', [{ text: 'OK', onPress: () => window.location.reload() }]);
       } else {
-        console.error('Erreur lors de l\'ajout de l\'activité');
+        Alert.alert('Erreur', 'Erreur lors de l\'ajout de l\'activité');
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
         setError(error.response.data.error);
       } else {
-        console.error('Erreur lors de l\'ajout de l\'activité', error);
+        Alert.alert('Erreur', 'Erreur lors de l\'ajout de l\'activité');
       }
     }
   };
 
   return (
-    <View>
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Activités</Text>
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
-      <View>
-        <Text>Animal</Text>
-        <Picker
-          selectedValue={activity.animalId}
-          onValueChange={(value) => handleChange('animalId', value)}
-          style={{ height: 50, width: 210 }}
-        >
-          <Picker.Item label="Sélectionner un animal" value="" />
-          {animaux.map(animal => (
-            <Picker.Item key={animal.Id_Animal} label={animal.Nom} value={animal.Id_Animal} />
-          ))}
-        </Picker>
-
-        <Text>Date du jour</Text>
-        <TextInput
-          value={activity.date}
-          editable={false}
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-        />
-
-        <Text>Début de l'activité</Text>
-        <TextInput
-          value={activity.debutActivite}
-          onChangeText={(value) => handleChange('debutActivite', value)}
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-        />
-
-        <Text>Fin de l'activité</Text>
-        <TextInput
-          value={activity.finActivite}
-          onChangeText={(value) => handleChange('finActivite', value)}
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-        />
-
-        <Button title="Ajouter l'Activité du jour" onPress={handleSubmit} />
+    <View style={styles.container}>
+      <Text style={styles.title}>Activités</Text>
+      <View style={styles.form}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Animal</Text>
+          <Picker
+            selectedValue={activity.animalId}
+            onValueChange={(value) => handleChange('animalId', value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Sélectionner un animal" value="" />
+            {animaux.map(animal => (
+              <Picker.Item key={animal.Id_Animal} label={animal.Nom} value={animal.Id_Animal} />
+            ))}
+          </Picker>
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Date de l'activité</Text>
+          <TextInput
+            style={styles.input}
+            value={activity.date}
+            onChangeText={(value) => handleChange('date', value)}
+            placeholder="AAAA-MM-JJ"
+            maxLength={10}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Début de l'activité</Text>
+          <TextInput
+            style={styles.input}
+            value={activity.debutActivite}
+            onChangeText={(value) => handleChange('debutActivite', value)}
+            placeholder="HH:MM"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Fin de l'activité</Text>
+          <TextInput
+            style={styles.input}
+            value={activity.finActivite}
+            onChangeText={(value) => handleChange('finActivite', value)}
+            placeholder="HH:MM"
+          />
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Ajouter l'Activité</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  form: {
+    marginBottom: 20,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+  },
+  picker: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 20,
+  },
+});
 
 export default AjouterActivites;

@@ -8,6 +8,11 @@ import useAuth from './context/useAuth';
 import Accueil from './screens/Accueil/Accueil';
 import Inscription from './screens/Authentification/Inscription';
 import Connexion from './screens/Authentification/Connexion';
+import ConditionsUtilisations from './screens/Legal/ConditionsUtilisations';
+import MentionsLegales from './screens/Legal/MentionsLegales';
+import PolitiqueDeCookies from './screens/Legal/PolitiqueDeCookies';
+import PolitiqueDeConfidentialite from './screens/Legal/PolitiqueDeConfidentialite';
+
 import Profil from './screens/Profil/Profil';
 import ModifierProfil from './screens/Profil/ModifierProfil';
 import SupprimerProfil from './screens/Profil/SupprimerProfil';
@@ -30,6 +35,10 @@ export default function App() {
           <Stack.Screen name="Accueil" component={Accueil} options={{ title: 'Accueil' }} />
           <Stack.Screen name="Inscription" component={Inscription} options={{ title: 'Inscription' }} />
           <Stack.Screen name="Connexion" component={Connexion} options={{ title: 'Connexion' }} />
+          <Stack.Screen name="ConditionsUtilisations" component={ConditionsUtilisations} options={{ title: 'Conditions Utilisations' }} />
+          <Stack.Screen name="PolitiqueDeCookies" component={PolitiqueDeCookies} options={{ title: 'Politique De Cookies' }} />
+          <Stack.Screen name="PolitiqueDeConfidentialite" component={PolitiqueDeConfidentialite} options={{ title: 'Politique De Confidentialite' }} />
+          <Stack.Screen name="MentionsLegales" component={MentionsLegales} options={{ title: 'Mentions Legales' }} />
           {authState.isAuthenticated ? (
             <>
               <Stack.Screen name="Profil" component={Profil} options={{ title: 'Profil' }} />

@@ -1,165 +1,187 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, Image, ScrollView, Pressable, Modal, StyleSheet, Alert } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Importer le hook useNavigation
-import axios from 'axios';
-import { AnimalContext } from '../../context/AnimalContext'; // Importer AnimalContext
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, Alert, StyleSheet, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../context/AuthContext';
+import { AnimalContext } from '../../context/AnimalContext';
+import { getAnimalsByUserId, deleteAnimalById } from '../../services/Animaux';
+import AucunAnimal from './AucunAnimal';
 
-function MesAnimauxList({ animaux, page, itemsPerPage, setMessage, fetchAnimaux, setPage }) {
-  const [showModal, setShowModal] = useState(false);
-  const [animalToDelete, setAnimalToDelete] = useState(null);
-  const { setSelectedAnimal } = useContext(AnimalContext); // Récupérer setSelectedAnimal du contexte
-  const navigation = useNavigation(); // Utiliser useNavigation pour obtenir l'objet navigation
-
+function MesAnimauxList({ fetchAnimalCount }) {
+  const { authState } = useContext(AuthContext);
+  const { setSelectedAnimal } = useContext(AnimalContext);
+  const navigation = useNavigation();
+  const [animaux, setAnimaux] = useState([]);
+  const [message, setMessage] = useState('');
+  const [page, setPage] = useState(1);
+  const [itemsPerPage] = useState(8);
   const defaultImage = require('../../assets/img/dog.png');
 
+  const fetchAnimaux = useCallback(() => {
+    if (authState.isAuthenticated && authState.user?.Id_Utilisateur) {
+      getAnimalsByUserId(authState.user.Id_Utilisateur)
+        .then((data) => {
+          setAnimaux(data);
+          if ((page - 1) * itemsPerPage >= data.length && page > 1) {
+            setPage(prevPage => prevPage - 1);
+          }
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la récupération des animaux:', error);
+        });
+    }
+  }, [authState, page, itemsPerPage]);
+
+  useEffect(() => {
+    fetchAnimaux();
+  }, [fetchAnimaux]);
+
   const handleDeleteClick = (animal) => {
-    setAnimalToDelete(animal);
-    setShowModal(true);
+    Alert.alert(
+      'Confirmation de Suppression',
+      "Cette action ne peut pas être annulée. Êtes-vous sûr de vouloir continuer ?",
+      [
+        {
+          text: 'Annuler',
+          style: 'cancel',
+        },
+        {
+          text: 'Supprimer',
+          onPress: () => handleConfirmDelete(animal),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
-  const handleConfirmDelete = async () => {
-    if (animalToDelete) {
-      try {
-        const url = `http://localhost:3001/animals/deleteAnimal/${animalToDelete.Id_Animal}`;
-        const response = await axios.delete(url, { withCredentials: true });
-        if (response.data.success) {
-          setMessage('Animal supprimé avec succès !');
-          fetchAnimaux();
-        } else {
-          setMessage('Erreur lors de la suppression de l\'animal.');
-        }
-      } catch (error) {
+  const handleConfirmDelete = async (animal) => {
+    try {
+      const data = await deleteAnimalById(animal.Id_Animal);
+      if (data.success) {
+        setMessage('Animal supprimé avec succès !');
+        setTimeout(() => {
+          setMessage('');
+        }, 5000);
+        fetchAnimaux();
+        fetchAnimalCount();
+      } else {
         setMessage('Erreur lors de la suppression de l\'animal.');
-        Alert.alert("Erreur", "Une erreur s'est produite lors de la suppression. Veuillez réessayer.");
-      } finally {
-        setShowModal(false);
-        setAnimalToDelete(null);
       }
+    } catch (error) {
+      setMessage('Erreur lors de la suppression de l\'animal.');
+      console.error('Erreur:', error);
     }
   };
 
   const handleEditClick = (animal) => {
-    setSelectedAnimal(animal); // Mettre à jour l'animal sélectionné dans le contexte
-    navigation.navigate('ModifierAnimal'); // Naviguer vers l'écran de modification
+    setSelectedAnimal(animal);
+    navigation.navigate('ModifierAnimal'); 
   };
+
+  const handleChangePage = (newPage) => {
+    setPage(newPage);
+  };
+
+  if (animaux.length === 0) {
+    return <AucunAnimal />;
+  }
 
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const displayedAnimaux = animaux.slice(startIndex, endIndex);
 
   return (
-    <ScrollView>
-      {displayedAnimaux.map(animal => (
-        <View key={animal.Id_Animal} style={styles.animalCard}>
-          <Image
-            source={{ uri: animal.photoURL || defaultImage }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          <Text>Nom: {animal.Nom}</Text>
-          <Pressable onPress={() => handleDeleteClick(animal)} style={styles.iconButton}>
-            <MaterialIcons name="delete" size={24} color="red" />
-          </Pressable>
-          <Pressable onPress={() => handleEditClick(animal)} style={styles.iconButton}>
-            <MaterialIcons name="edit" size={24} color="black" />
-          </Pressable>
-        </View>
-      ))}
-      
-      {/* Pagination */}
-      <View style={styles.paginationContainer}>
-        <Pressable onPress={() => handleChangePage(page - 1)} disabled={page === 1}>
-          <Text style={{ color: page === 1 ? 'gray' : 'blue' }}>Previous</Text>
-        </Pressable>
-        <Text style={styles.pageText}>Page {page} of {Math.ceil(animaux.length / itemsPerPage)}</Text>
-        <Pressable onPress={() => handleChangePage(page + 1)} disabled={page === Math.ceil(animaux.length / itemsPerPage)}>
-          <Text style={{ color: page === Math.ceil(animaux.length / itemsPerPage) ? 'gray' : 'blue' }}>Next</Text>
-        </Pressable>
-      </View>
-
-      {/* Modal for deletion confirmation */}
-      <Modal
-        transparent={true}
-        visible={showModal}
-        onRequestClose={() => setShowModal(false)}
-        animationType="slide"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Confirmation de Suppression</Text>
-            <Text style={styles.modalText}>Êtes-vous sûr de vouloir supprimer cet animal ? Cette action est irréversible.</Text>
-            <View style={styles.modalActions}>
-              <Pressable onPress={() => setShowModal(false)} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Annuler</Text>
-              </Pressable>
-              <Pressable onPress={handleConfirmDelete} style={styles.modalButton}>
-                <Text style={[styles.modalButtonText, { color: 'red' }]}>Supprimer</Text>
-              </Pressable>
+    <View style={styles.container}>
+      <Text style={styles.title}>Mes Animaux</Text>
+      {message ? <Text style={styles.message}>{message}</Text> : null}
+      <FlatList
+        data={displayedAnimaux}
+        keyExtractor={animal => animal.Id_Animal.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.animalCard}>
+            <Image source={item.photoURL ? { uri: item.photoURL } : defaultImage} style={styles.animalImage} />
+            <Text style={styles.animalName}>{item.Nom}</Text>
+            <Text>Date de Naissance: {item.Date_De_Naissance}</Text>
+            <Text>Date d'Adoption: {item.Date_Adoption}</Text>
+            <Text>Espèce: {item.Espece}</Text>
+            <Text>Race: {item.Race}</Text>
+            <Text>Sexe: {item.Sexe}</Text>
+            <Text>Poids: {item.Poids} kg</Text>
+            <View style={styles.iconContainer}>
+              <TouchableOpacity onPress={() => handleEditClick(item)} style={styles.iconButton}>
+                <Text style={styles.iconText}>Éditer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDeleteClick(item)} style={styles.iconButton}>
+                <Text style={styles.iconText}>Supprimer</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        )}
+        ListFooterComponent={
+          animaux.length > itemsPerPage && (
+            <View style={styles.pagination}>
+              <Button title="Précédent" onPress={() => handleChangePage(Math.max(page - 1, 1))} />
+              <Text>{page}</Text>
+              <Button title="Suivant" onPress={() => handleChangePage(page + 1)} />
+            </View>
+          )
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  animalCard: {
-    marginBottom: 20,
-    borderWidth: 1,
-    padding: 10,
-  },
-  image: {
-    width: 100,
-    height: 100,
-  },
-  iconButton: {
-    marginVertical: 5,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  pageText: {
-    marginHorizontal: 10,
-  },
-  modalOverlay: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  modalContainer: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  message: {
+    color: 'green',
+    marginBottom: 20,
+  },
+  animalCard: {
+    backgroundColor: '#f9f9f9',
     borderRadius: 10,
-    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
   },
-  modalTitle: {
+  animalImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+    borderRadius: 10,
+  },
+  animalName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginTop: 10,
   },
-  modalText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  modalActions: {
+  iconContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    marginTop: 10,
   },
-  modalButton: {
+  iconButton: {
+    backgroundColor: '#1a3558',
     padding: 10,
-    alignItems: 'center',
-    flex: 1,
+    borderRadius: 5,
   },
-  modalButtonText: {
-    fontSize: 16,
+  iconText: {
+    color: '#fff',
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
   },
 });
 

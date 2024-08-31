@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
-import { AnimalContext } from '../../context/AnimalContext';
 import * as Yup from 'yup';
+import DOMPurify from 'dompurify';
+import { AnimalContext } from '../../context/AnimalContext';
 import { AuthContext } from '../../context/AuthContext';
+import { updateAnimal } from '../../services/Animaux';
 
 function ModifierAnimalForm() {
   const { selectedAnimal, setSelectedAnimal } = useContext(AnimalContext);
@@ -21,22 +22,36 @@ function ModifierAnimalForm() {
     Habitat: ''
   });
   const [message, setMessage] = useState('');
+  const [initialAnimal, setInitialAnimal] = useState(null);
 
   useEffect(() => {
     if (selectedAnimal) {
       setAnimal(selectedAnimal);
+      setInitialAnimal({
+        ...selectedAnimal,
+        Nom: selectedAnimal.Nom.replace(/\s/g, ''),
+        Race: selectedAnimal.Race.replace(/\s/g, ''),
+        Espece: selectedAnimal.Espece.replace(/\s/g, ''),
+        Sexe: selectedAnimal.Sexe.replace(/\s/g, ''),
+        Poids: selectedAnimal.Poids,
+        Habitat: selectedAnimal.Habitat.replace(/\s/g, '')
+      });
     } else {
-      navigation.navigate('MesAnimaux');  
+      navigation.navigate('MesAnimaux');
     }
   }, [selectedAnimal, navigation]);
 
   const validationSchema = Yup.object().shape({
     Nom: Yup.string()
       .required('Nom est requis')
-      .max(50, 'Le nom ne peut pas dépasser 50 caractères')
-      .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ _-]*$/, 'Le nom ne doit contenir que des lettres, des espaces, des tirets ou des underscores')
-      .test('contains-two-letters', 'Le nom doit contenir au moins 2 lettres', value => 
-        (value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || []).length >= 2),
+      .max(100, 'Le nom ne peut pas dépasser 100 caractères')
+      .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ_-]*$/, 'Le nom ne doit contenir que des lettres, des tirets ou des underscores')
+      .test('contains-two-letters', 'Le nom doit contenir au moins 2 lettres', value =>
+        (value.replace(/\s/g, '').match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || []).length >= 2)
+      .test('no-consecutive-uppercase', 'Le nom ne doit pas contenir deux majuscules consécutives', value =>
+        !/(?:[A-Z]{2,})/.test(value))
+      .test('no-sql-keywords', 'Le nom ne doit pas contenir des mots réservés SQL', value =>
+        !/(DROP\s+TABLE|SELECT|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC)/i.test(value)),
     Date_De_Naissance: Yup.date()
       .required('Date de naissance est requise')
       .nullable()
@@ -44,157 +59,197 @@ function ModifierAnimalForm() {
     Date_Adoption: Yup.date()
       .required('Date d\'adoption est requise')
       .nullable()
-      .min(
-        Yup.ref('Date_De_Naissance'),
-        'Date d\'adoption doit être après la date de naissance'
-      )
+      .min(Yup.ref('Date_De_Naissance'), 'Date d\'adoption doit être après la date de naissance')
       .max(new Date(), 'La date d\'adoption ne peut pas être dans le futur'),
     Espece: Yup.string()
       .required('Type d\'animal est requis')
-      .oneOf([
-        'chat', 'chien', 'lapin', 'hamster', 'cochon d\'inde', 'furet', 'chinchilla', 'souris', 'singe', 'hérisson',
-        'poissons rouges', 'carpes koï', 'poisson-clown', 'poisson-ange', 'poisson-chat',
-        'perroquet', 'canari', 'poule', 'coq', 'canard', 'oie', 'dindon', 'perruche', 'pigeon', 'moineau',
-        'tortue', 'lézard', 'gecko', 'serpent', 'axolotl', 'salamandre', 'iguane', 'caméléon', 'grenouille', 'triton'
-      ], 'Type d\'animal invalide'),
-    Race: Yup.string().required('Race est requise'),
-    Sexe: Yup.string().required('Sexe est requis'),
+      .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ\s_-]*$/, 'Le type d\'animal ne doit pas contenir de caractères spéciaux')
+      .test('no-sql-keywords', 'Le type d\'animal ne doit pas contenir des mots réservés SQL', value =>
+        !/(DROP\s+TABLE|SELECT|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC)/i.test(value)),
+    Race: Yup.string()
+      .required('Race est requise')
+      .max(100, 'La race ne peut pas dépasser 100 caractères')
+      .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ\s_-]*$/, 'La race ne doit pas contenir de caractères spéciaux')
+      .test('no-consecutive-uppercase', 'La race ne doit pas contenir deux majuscules consécutives', value =>
+        !/(?:[A-Z]{2,})/.test(value))
+      .test('no-sql-keywords', 'La race ne doit pas contenir des mots réservés SQL', value =>
+        !/(DROP\s+TABLE|SELECT|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC)/i.test(value)),
+    Sexe: Yup.string()
+      .required('Sexe est requis')
+      .test('no-sql-keywords', 'Le sexe ne doit pas contenir des mots réservés SQL', value =>
+        !/(DROP\s+TABLE|SELECT|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC)/i.test(value)),
     Poids: Yup.number()
       .required('Poids est requis')
       .min(0.1, 'Le poids doit être au minimum de 0.1 kg')
       .max(4000, 'Le poids ne peut pas dépasser 4000kg'),
-    Habitat: Yup.string().required('Habitat est requis')
+    Habitat: Yup.string()
+      .required('Habitat est requis')
+      .test('no-sql-keywords', 'L\'habitat ne doit pas contenir des mots réservés SQL', value =>
+        !/(DROP\s+TABLE|SELECT|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC)/i.test(value)),
   });
 
   const handleChange = (name, value) => {
     setAnimal((prevAnimal) => ({
       ...prevAnimal,
-      [name]: value,
+      [name]: value
     }));
   };
 
   const handleSubmit = async () => {
     const isValid = await validationSchema.isValid(animal);
     if (!isValid) {
-      Alert.alert('Erreur', 'Veuillez remplir correctement tous les champs.');
+      Alert.alert('Validation', 'Veuillez remplir correctement tous les champs.');
       return;
     }
 
-    const isModified = Object.keys(animal).some(key => animal[key] !== selectedAnimal[key]);
+    const isModified = Object.keys(animal).some(key => {
+      const newValue = typeof animal[key] === 'string' ? animal[key].replace(/\s/g, '') : animal[key];
+      const oldValue = typeof initialAnimal[key] === 'string' ? initialAnimal[key] : selectedAnimal[key];
+
+      if (newValue === '' && oldValue !== '') {
+        Alert.alert('Validation', `Le champ ${key} ne peut pas être vidé.`);
+        return false;
+      }
+
+      return newValue !== oldValue;
+    });
+
     if (!isModified) {
-      Alert.alert('Erreur', 'Veuillez modifier au moins un champ.');
+      Alert.alert('Validation', 'Aucune modification détectée ou les espaces ne sont pas pris en compte.');
       return;
     }
+
+    const sanitizedAnimal = {
+      ...animal,
+      Nom: DOMPurify.sanitize(animal.Nom),
+      Race: DOMPurify.sanitize(animal.Race),
+      Espece: DOMPurify.sanitize(animal.Espece),
+      Sexe: DOMPurify.sanitize(animal.Sexe),
+      Habitat: DOMPurify.sanitize(animal.Habitat),
+    };
 
     try {
-      await axios.put(`http://localhost:3001/animals/updateAnimal/${selectedAnimal.Id_Animal}`, animal, {
-        headers: {
-          'Authorization': `Bearer ${authState.token}`
-        },
-        withCredentials: true
-      });
-      setSelectedAnimal(null);
-      navigation.navigate('MesAnimaux');
+      const response = await updateAnimal(selectedAnimal.Id_Animal, sanitizedAnimal, authState.token);
+
+      if (response.success) {
+        setSelectedAnimal(null);
+        navigation.navigate('MesAnimaux');
+      } else if (response.error) {
+        setMessage(response.error);
+      }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'animal:', error);
-      setMessage('Erreur lors de la mise à jour de l\'animal');
+      setMessage('Vous avez dépassé la limite de 3 modifications de l\'animal par jour');
     }
   };
 
   if (!animal) {
-    return <Text>Loading...</Text>;
+    return <Text>Chargement...</Text>;
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modifier Animal: {animal.Nom}</Text>
-      
-      <Text style={styles.label}>Nom:</Text>
-      <TextInput
-        value={animal.Nom}
-        onChangeText={(value) => handleChange('Nom', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Date de Naissance:</Text>
-      <TextInput
-        value={animal.Date_De_Naissance}
-        onChangeText={(value) => handleChange('Date_De_Naissance', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Date d'Adoption:</Text>
-      <TextInput
-        value={animal.Date_Adoption}
-        onChangeText={(value) => handleChange('Date_Adoption', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Espèce:</Text>
-      <TextInput
-        value={animal.Espece}
-        onChangeText={(value) => handleChange('Espece', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Race:</Text>
-      <TextInput
-        value={animal.Race}
-        onChangeText={(value) => handleChange('Race', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Sexe:</Text>
-      <TextInput
-        value={animal.Sexe}
-        onChangeText={(value) => handleChange('Sexe', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Poids (kg):</Text>
-      <TextInput
-        value={animal.Poids}
-        onChangeText={(value) => handleChange('Poids', value)}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>Habitat:</Text>
-      <TextInput
-        value={animal.Habitat}
-        onChangeText={(value) => handleChange('Habitat', value)}
-        style={styles.input}
-      />
-
-      <Button title="Enregistrer les modifications" onPress={handleSubmit} />
-
-      {message ? <Text style={styles.error}>{message}</Text> : null}
+      <Text style={styles.title}>Modifier Animal: {initialAnimal?.Nom}</Text>
+      <View style={styles.form}>
+        {message ? <Text style={styles.error}>{message}</Text> : null}
+        <View style={styles.inputGroup}>
+          <Text>Nom:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Nom}
+            onChangeText={(text) => handleChange('Nom', text)}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Date de Naissance:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Date_De_Naissance}
+            onChangeText={(text) => handleChange('Date_De_Naissance', text)}
+            placeholder="AAAA-MM-JJ"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Date d'Adoption:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Date_Adoption}
+            onChangeText={(text) => handleChange('Date_Adoption', text)}
+            placeholder="AAAA-MM-JJ"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Espèce:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Espece}
+            onChangeText={(text) => handleChange('Espece', text)}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Race:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Race}
+            onChangeText={(text) => handleChange('Race', text)}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Sexe:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Sexe}
+            onChangeText={(text) => handleChange('Sexe', text)}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Poids (kg):</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Poids.toString()}
+            onChangeText={(text) => handleChange('Poids', text)}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text>Habitat:</Text>
+          <TextInput
+            style={styles.input}
+            value={animal.Habitat}
+            onChangeText={(text) => handleChange('Habitat', text)}
+          />
+        </View>
+        <Button title="Enregistrer les modifications" onPress={handleSubmit} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
+  form: {
+    flex: 1,
+  },
+  inputGroup: {
+    marginBottom: 16,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 15,
-    paddingLeft: 10,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
   },
   error: {
     color: 'red',
-    marginTop: 10,
+    marginBottom: 20,
   },
 });
 

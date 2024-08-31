@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const logout = async (setAuthState) => {
+const logout = async (setAuthState, navigation) => {
   try {
     const response = await axios.post('http://localhost:3001/auth/logout', {}, { withCredentials: true });
     if (response.data.success) {
@@ -8,7 +8,7 @@ const logout = async (setAuthState) => {
         isAuthenticated: false,
         isLoading: false,
       });
-      window.location.href = '/';
+      navigation.navigate('Accueil'); 
     } else {
       console.error('Logout failed:', response.data.message);
     }
