@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, Alert, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import * as Yup from 'yup';
 import { Formik } from 'formik';
+import * as Yup from 'yup';
 import { createUser } from '../../services/Auth';
+import { useNavigation } from '@react-navigation/native';
+import { Inscription, FormContainer, FormBox, Label, StyledInput, Terms, TermsInput, TermsLabel, TermsLink, ErrorText, Title, FormLink,
+} from '../../styles/FormulairesStyle';
+import { Button } from 'react-native'; 
 
-function InscriptionForm({ navigation }) {
+function InscriptionForm() {
+  const navigation = useNavigation();
+
   const initialValues = {
     Nom: '',
     Email: '',
@@ -17,7 +21,8 @@ function InscriptionForm({ navigation }) {
   const validationSchema = Yup.object().shape({
     Nom: Yup.string()
       .matches(/^[\p{L}0-9-_' ]{3,15}$/u, {
-        message: "Le nom doit contenir uniquement des lettres, des chiffres ou les caractères -_' et doit avoir entre 3 et 15 caractères.",
+        message:
+          "Le nom doit contenir uniquement des lettres, des chiffres ou les caractères -_' et doit avoir entre 3 et 15 caractères.",
       })
       .required('Le nom est requis'),
     Email: Yup.string()
@@ -41,7 +46,7 @@ function InscriptionForm({ navigation }) {
   const onSubmit = (userData, { setSubmitting, setFieldError }) => {
     createUser(userData)
       .then(() => {
-        navigation.navigate('Connexion');
+        navigation.navigate('Profil');
         setSubmitting(false);
       })
       .catch(error => {
@@ -62,134 +67,92 @@ function InscriptionForm({ navigation }) {
   };
 
   return (
-    <View style={styles.inscription}>
-      <Text style={styles.title}>Inscription</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Connexion')}>
-        <Text style={styles.formLink}>Vous avez déjà un compte ? cliquez ici.</Text>
-      </TouchableOpacity>
+    <Inscription>
+      <Title>Inscription</Title>
+      <FormLink onPress={() => navigation.navigate('Connexion')}>
+        Vous avez déjà un compte ? cliquez ici.
+      </FormLink>
       <Formik
         initialValues={initialValues}
-        onSubmit={onSubmit}
         validationSchema={validationSchema}
+        onSubmit={onSubmit}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue, isSubmitting }) => (
-          <View style={styles.formContainer}>
-            <Text style={styles.label}>Nom:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={handleChange('Nom')}
-              onBlur={handleBlur('Nom')}
-              value={values.Nom}
-              placeholder="Votre nom..."
-            />
-            {touched.Nom && errors.Nom && <Text style={styles.error}>{errors.Nom}</Text>}
+          <FormContainer>
+            <FormBox>
+              <Label>Nom:</Label>
+              <StyledInput
+                onChangeText={handleChange('Nom')}
+                onBlur={handleBlur('Nom')}
+                value={values.Nom}
+                placeholder="Votre nom..."
+              />
+              {touched.Nom && errors.Nom && <ErrorText>{errors.Nom}</ErrorText>}
 
-            <Text style={styles.label}>Email:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={handleChange('Email')}
-              onBlur={handleBlur('Email')}
-              value={values.Email}
-              placeholder="Votre email..."
-              keyboardType="email-address"
-            />
-            {touched.Email && errors.Email && <Text style={styles.error}>{errors.Email}</Text>}
+              <Label>Email:</Label>
+              <StyledInput
+                onChangeText={handleChange('Email')}
+                onBlur={handleBlur('Email')}
+                value={values.Email}
+                placeholder="Votre email..."
+                keyboardType="email-address"
+              />
+              {touched.Email && errors.Email && <ErrorText>{errors.Email}</ErrorText>}
 
-            <Text style={styles.label}>Mot de Passe:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={handleChange('Mot_De_Passe')}
-              onBlur={handleBlur('Mot_De_Passe')}
-              value={values.Mot_De_Passe}
-              placeholder="Votre mot de passe..."
-              secureTextEntry
-            />
-            {touched.Mot_De_Passe && errors.Mot_De_Passe && (
-              <Text style={styles.error}>{errors.Mot_De_Passe}</Text>
-            )}
+              <Label>Mot de Passe:</Label>
+              <StyledInput
+                onChangeText={handleChange('Mot_De_Passe')}
+                onBlur={handleBlur('Mot_De_Passe')}
+                value={values.Mot_De_Passe}
+                placeholder="Votre mot de passe..."
+                secureTextEntry
+              />
+              {touched.Mot_De_Passe && errors.Mot_De_Passe && <ErrorText>{errors.Mot_De_Passe}</ErrorText>}
 
-            <Text style={styles.label}>Confirmer Mot de Passe:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={handleChange('Confirm_Mot_De_Passe')}
-              onBlur={handleBlur('Confirm_Mot_De_Passe')}
-              value={values.Confirm_Mot_De_Passe}
-              placeholder="Confirmez votre mot de passe..."
-              secureTextEntry
-            />
-            {touched.Confirm_Mot_De_Passe && errors.Confirm_Mot_De_Passe && (
-              <Text style={styles.error}>{errors.Confirm_Mot_De_Passe}</Text>
-            )}
+              <Label>Confirmer Mot de Passe:</Label>
+              <StyledInput
+                onChangeText={handleChange('Confirm_Mot_De_Passe')}
+                onBlur={handleBlur('Confirm_Mot_De_Passe')}
+                value={values.Confirm_Mot_De_Passe}
+                placeholder="Confirmez votre mot de passe..."
+                secureTextEntry
+              />
+              {touched.Confirm_Mot_De_Passe && errors.Confirm_Mot_De_Passe && <ErrorText>{errors.Confirm_Mot_De_Passe}</ErrorText>}
 
-            <View style={styles.termsContainer}>
-              <TouchableOpacity onPress={() => setFieldValue('acceptTerms', !values.acceptTerms)}>
-                <Text style={styles.termsText}>
-                  En continuant, vous acceptez nos <Text style={styles.linkText}>Politique de Confidentialité</Text>, <Text style={styles.linkText}>Politique de Cookies</Text> et <Text style={styles.linkText}>Mentions Légales</Text>.
-                </Text>
-              </TouchableOpacity>
-              {touched.acceptTerms && errors.acceptTerms && (
-                <Text style={styles.error}>{errors.acceptTerms}</Text>
-              )}
-            </View>
+              <Terms>
+              <TermsInput
+                  value={values.acceptTerms}
+                  onValueChange={() => setFieldValue('acceptTerms', !values.acceptTerms)}
+                />
+                <TermsLabel>
+                  En continuant, vous acceptez nos{' '}
+                  <TermsLink onPress={() => navigation.navigate('PolitiqueDeConfidentialite')}>
+                    Politique de Confidentialité
+                  </TermsLink>,{' '}
+                  <TermsLink onPress={() => navigation.navigate('PolitiqueDeCookies')}>
+                    Politique de Cookies
+                  </TermsLink> et{' '}
+                  <TermsLink onPress={() => navigation.navigate('MentionsLegales')}>
+                    Mentions Légales
+                  </TermsLink>.
+                </TermsLabel>
+              </Terms>
+              {touched.acceptTerms && errors.acceptTerms && <ErrorText>{errors.acceptTerms}</ErrorText>}
 
-            <Button
-              onPress={handleSubmit}
-              title="Créer mon compte"
-              disabled={isSubmitting || !values.acceptTerms}
-            />
+              <Button
+                title="Créer mon compte"
+                onPress={handleSubmit}
+                disabled={isSubmitting || !values.acceptTerms}
+                color="#003366"
+              />
 
-            {errors.submit && <Text style={styles.error}>{errors.submit}</Text>}
-          </View>
+              {errors.submit && <ErrorText>{errors.submit}</ErrorText>}
+            </FormBox>
+          </FormContainer>
         )}
       </Formik>
-    </View>
+    </Inscription>
   );
 }
-
-const styles = StyleSheet.create({
-  inscription: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  formLink: {
-    color: '#0066cc',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  formContainer: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-  termsContainer: {
-    marginBottom: 20,
-  },
-  termsText: {
-    fontSize: 14,
-  },
-  linkText: {
-    color: '#0066cc',
-  },
-});
 
 export default InscriptionForm;

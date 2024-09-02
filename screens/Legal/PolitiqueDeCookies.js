@@ -1,22 +1,32 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import TextPolitiqueDeCookies from '../../components/Legal/TextPolitiqueDeCookies';
 import TabNavigator from '../../components/Basics/TabNavigator';
 
 function PolitiqueDeCookies({ navigation }) {
   return (
-    <View style={styles.container}>
-      <TextPolitiqueDeCookies navigation={navigation} />
-      <TabNavigator/>
-    </View>
+    <LinearGradient
+      colors={['#e0c3fc', '#8ec5fc']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <TextPolitiqueDeCookies navigation={navigation} />
+      </ScrollView>
+      <TabNavigator />
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
 });
 

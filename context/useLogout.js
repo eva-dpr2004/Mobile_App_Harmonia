@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const logout = async (setAuthState, navigation) => {
   try {
-    const response = await axios.post('http://localhost:3001/auth/logout', {}, { withCredentials: true });
+    const response = await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
     if (response.data.success) {
       setAuthState({
         isAuthenticated: false,

@@ -10,7 +10,7 @@ const useAuth = () => {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:3001/auth/auth", { withCredentials: true })
+    axios.get("http://localhost:8000/auth/auth", { withCredentials: true })
       .then((response) => {
         if (response.data.error) {
           setAuthState({

@@ -1,23 +1,33 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import TabNavigator from '../../components/Basics/TabNavigator';
 import TypesAnimauxList from '../../components/Animaux/TypesAnimauxList';
+import TabNavigator from '../../components/Basics/TabNavigator';
+import { ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 function TypesAnimaux({ navigation }) {
   return (
-    <View style={styles.container}>
-      <TypesAnimauxList navigation={navigation} />
+    <LinearGradient
+      colors={['#e0c3fc', '#8ec5fc']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <TypesAnimauxList navigation={navigation} />
+      </ScrollView>
       <TabNavigator />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
 });
 
 export default TypesAnimaux;
+

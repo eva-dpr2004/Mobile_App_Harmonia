@@ -1,20 +1,29 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import TabNavigator from '../../components/Basics/TabNavigator';
 import ModifierProfilForm from '../../components/Profil/ModifierProfilForm';
 
 function ModifierProfil({ navigation }) {
   return (
-    <View style={styles.container}>
-      <ModifierProfilForm navigation={navigation} />
+    <LinearGradient
+      colors={['#e0c3fc', '#8ec5fc']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <ModifierProfilForm navigation={navigation} />
+      </ScrollView>
       <TabNavigator />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

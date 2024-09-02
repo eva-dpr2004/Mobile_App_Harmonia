@@ -135,9 +135,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
   },
   title: {
+    color:'#1f3b64',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -155,9 +155,10 @@ const styles = StyleSheet.create({
   },
   animalImage: {
     width: '100%',
-    height: 150,
+    height: 210,
     resizeMode: 'cover',
-    borderRadius: 10,
+    background: 'cover',
+    borderRadius: '50%',
   },
   animalName: {
     fontSize: 18,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { ScrollView, Text, StyleSheet, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
 import MesAnimauxList from '../../components/Animaux/MesAnimauxList';
@@ -18,7 +19,7 @@ function MesAnimaux() {
 
   const fetchAnimaux = useCallback(() => {
     if (authState.isAuthenticated && authState.user?.Id_Utilisateur) {
-      const url = `http://localhost:3001/animals/byUserId/${authState.user.Id_Utilisateur}`;
+      const url = `http://localhost:8000/animals/byUserId/${authState.user.Id_Utilisateur}`;
       axios.get(url, { withCredentials: true })
         .then(response => {
           setAnimaux(response.data);
@@ -35,27 +36,51 @@ function MesAnimaux() {
   }, [fetchAnimaux]);
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Mes Animaux</Text>
-      {message && <Text style={{ color: 'green', marginBottom: 20 }}>{message}</Text>}
-      
-      {animaux.length === 0 ? (
-        <AucunAnimal />
-      ) : (
-        <MesAnimauxList
-          animaux={animaux}
-          page={page}
-          itemsPerPage={itemsPerPage}
-          setMessage={setMessage}
-          fetchAnimaux={fetchAnimaux}
-          setPage={setPage}
-        />
-      )}
+    <LinearGradient
+      colors={['#e0c3fc', '#8ec5fc']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        {message && <Text style={styles.message}>{message}</Text>}
+        
+        {animaux.length === 0 ? (
+          <AucunAnimal />
+        ) : (
+          <MesAnimauxList
+            animaux={animaux}
+            page={page}
+            itemsPerPage={itemsPerPage}
+            setMessage={setMessage}
+            fetchAnimaux={fetchAnimaux}
+            setPage={setPage}
+          />
+        )}
 
-      <BoutonAjouterAnimal navigation={navigation} />
+        <BoutonAjouterAnimal navigation={navigation} />
+      </ScrollView>
       <TabNavigator />
-    </View>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  message: {
+    color: 'green',
+    marginBottom: 20,
+  },
+});
 
 export default MesAnimaux;

@@ -1,24 +1,33 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import AjouterActivites from '../../components/Activites/AjouterActivites'; 
 import TableauActivites from '../../components/Activites/TableauActivites'; 
 import TabNavigator from '../../components/Basics/TabNavigator';
 
 const Activites = () => {
   return (
-    <ScrollView style={styles.container}>
-      <AjouterActivites />  
-      <TableauActivites />  
+    <LinearGradient
+      colors={['#e0c3fc', '#8ec5fc']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <AjouterActivites />  
+        <TableauActivites />  
+      </ScrollView>
       <TabNavigator />
-    </ScrollView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

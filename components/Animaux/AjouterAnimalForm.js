@@ -7,6 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { storage } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { addAnimal } from '../../services/Animaux';
 
 const typesAnimauxDisponibles = [
@@ -89,12 +90,17 @@ const AjouterAnimalForm = () => {
       values.Espece = values.Espece.toLowerCase();
 
       if (file) {
-        const fileRef = ref(storage, `animals/${file.uri.split('/').pop()}`);
-        const img = await fetch(file.uri);
-        const bytes = await img.blob();
-        await uploadBytes(fileRef, bytes);
-        const photoURL = await getDownloadURL(fileRef);
-        values.photoURL = photoURL;
+        try {
+          const fileRef = ref(storage, `animals/${file.uri.split('/').pop()}`);
+          const img = await fetch(file.uri);
+          const bytes = await img.blob();
+          await uploadBytes(fileRef, bytes);
+          const photoURL = await getDownloadURL(fileRef);
+          values.photoURL = photoURL;
+        } catch (error) {
+          console.error('Erreur lors du téléchargement de l\'image:', error);
+          return; // Arrête l'exécution en cas d'erreur
+        }
       }
 
       try {
@@ -123,9 +129,25 @@ const AjouterAnimalForm = () => {
     });
 
     if (!result.canceled) {
-      setFile(result.assets[0]);
-      setPreview(result.assets[0].uri);
-      setFileError('');
+      const fileUri = result.assets[0].uri;
+
+      try {
+        // On peut copier l'image dans un répertoire temporaire si nécessaire
+        const tempFileUri = `${FileSystem.documentDirectory}${fileUri.split('/').pop()}`;
+        await FileSystem.copyAsync({
+          from: fileUri,
+          to: tempFileUri,
+        });
+
+        setFile({ uri: tempFileUri });
+        setPreview(tempFileUri);
+        setFileError('');
+      } catch (error) {
+        console.error('Erreur lors de la manipulation du fichier:', error);
+        setFileError('Erreur lors de la manipulation du fichier');
+        setFile(null);
+        setPreview(null);
+      }
     } else {
       setFileError('Veuillez sélectionner un fichier image valide.');
       setFile(null);

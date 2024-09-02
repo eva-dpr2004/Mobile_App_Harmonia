@@ -17,7 +17,7 @@ export const MainContent = styled.View`
 export const MainTitle = styled.Text`
   font-size: 24px;
   margin-bottom: 6%;
-  color: #333;
+  color: #1f3b64;
 `;
 
 export const ImagesRow = styled.View`
@@ -74,7 +74,7 @@ export const Image = styled.Image`
 
 export const Description = styled.Text`
   font-size: 16px;
-  color: #171717;
+  color: #1f3b64;
   margin-bottom: 20px;
   clear: both;
   position: relative;
@@ -86,7 +86,7 @@ export const Description = styled.Text`
 
 export const Description2 = styled.Text`
   font-size: 16px;
-  color: #171717;
+  color: #1f3b64;
   margin-bottom: 20px;
   clear: both;
   position: relative;
@@ -100,7 +100,7 @@ export const StartButton = styled.TouchableOpacity`
   padding: 10px 20px;
   font-size: 16px;
   background-color: #bedeff;
-  color: #193356;
+  color: #1f3b64;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -110,7 +110,7 @@ export const StartButton = styled.TouchableOpacity`
 `;
 
 export const StartButtonText = styled.Text`
-  color: #193356;
+  color: #1f3b64;
   font-size: 16px;
 `;
 

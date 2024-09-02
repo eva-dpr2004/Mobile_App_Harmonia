@@ -70,9 +70,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#fff',
+        alignItems: 'center',
     },
     title: {
+        color: 'rgb(24, 50, 87)',
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,

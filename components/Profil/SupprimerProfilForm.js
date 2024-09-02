@@ -83,7 +83,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   image: {
@@ -93,13 +92,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   box: {
-    width: '100%',
+    width: '50%',
     padding: 16,
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     elevation: 2,
   },
   title: {
+    color: 'rgb(24, 50, 87)',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   deleteButton: {
-    backgroundColor: '#d9534f',
+    backgroundColor: '#1f3b64',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',

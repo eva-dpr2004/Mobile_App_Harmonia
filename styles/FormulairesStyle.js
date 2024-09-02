@@ -1,22 +1,26 @@
 import styled from 'styled-components/native';
+import { Animated } from 'react-native';
 
-export const ConnexionContainer = styled.View`
-  margin-bottom: 6%;
+// Composants pour le formulaire d'inscription
+export const Connexion = styled.View`
+  margin-bottom: 2%;
 `;
 
-export const InscriptionContainer = styled.View`
+export const Inscription = styled.View`
+  margin-bottom: 2%;
+`;
+
+export const ModificationAnimal = styled.View`
   margin-bottom: 2%;
 `;
 
 export const FormContainer = styled.View`
   justify-content: center;
   align-items: center;
-  flex: 1;
 `;
 
 export const FormBox = styled.View`
-  margin-top: 2%;
-  background: rgba(224, 235, 248, 0.61);
+  background-color: rgba(224, 235, 248, 0.62);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -27,47 +31,58 @@ export const FormBox = styled.View`
   flex-direction: column;
 `;
 
-export const FormTitle = styled.Text`
-  margin-top: 5%;
-  margin-bottom: 1.2rem;
-  color: #193356;
+export const FormLink = styled.Text`
+  text-align:center;
+  margin-bottom: 2%;
+  color: #0066cc;
   text-decoration: underline;
+`;
+
+export const Title = styled.Text`
+  margin-top: 5%;
+  margin-bottom: 12px;
+  color: #193356;
   font-size: 24px;
   font-weight: bold;
-`;
-
-export const FormLink = styled.Text`
-  margin-top: 5%;
-  margin-bottom: 1.2rem;
-  color: #193356;
   text-decoration: underline;
-  font-size: 16px;
+  text-align: center;
 `;
 
-export const Label = styled.Text`
-  color: #193356;
-  margin-top: 2%;
-  font-size: 14px;
-  text-align: left;
+export const InscriptionTitle = styled(Title)`
+  margin-top: 3%;
+  margin-bottom: 15px;
 `;
 
-export const Input = styled.TextInput`
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
+export const StyledForm = styled.View`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const StyledInput = styled.TextInput`
+  margin-top: 8px;
+  margin-bottom: 16px;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 12px;
 `;
 
-export const TermsContainer = styled.View`
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-direction: row;
+export const Label = styled.Text`
+  color: #193356;
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: left;
 `;
 
-export const TermsLabel = styled.Text`
+export const Terms = styled.View`
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+export const TermsInput = styled.Switch``;
+
+export const TermsLabel = styled(Label)`
   font-size: 12px;
 `;
 
@@ -76,73 +91,167 @@ export const TermsLink = styled.Text`
   text-decoration: none;
 `;
 
-export const Button = styled.TouchableOpacity`
+export const StyledButton = styled.TouchableOpacity`
   padding: 12px;
-  background: #003366;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  align-items: center;
-`;
-
-export const ButtonText = styled.Text`
-  color: #fff;
-`;
-
-export const DisabledButton = styled(Button)`
-  background: #819db8;
+  border-radius: 30px;
+  text-align: center;
 `;
 
 export const ErrorText = styled.Text`
   color: red;
   font-size: 9px;
   text-align: left;
-  margin-bottom: 2%;
+  margin-bottom: 8px;
 `;
 
+// Images styles (adaptés à React Native)
 export const ImgConnexion = styled.Image`
-  width: 22%;
-  position: absolute;
-  left: 17%;
-  top: 25%;
-`;
-
-export const ImgInscription = styled.Image`
-  transform: scaleX(-1);
-  width: 23%;
-  position: absolute;
-  right: 15%;
-  top: 35%;
-`;
-
-export const ImgModifierProfil = styled.Image`
-  width: 14%;
-  position: absolute;
-  right: 20%;
-  top: 18%;
-`;
-
-export const ImgSupprimerProfil = styled.Image`
-  width: 20%;
+  width: 15%;
+  height: 50px;
   position: absolute;
   left: 15%;
   top: 20%;
 `;
 
-export const ImgAvisGlobal = styled.Image`
+export const ImgModifierProfil = styled(ImgConnexion)`
+  width: 14%;
+  right: 20%;
+  top: 18%;
+`;
+
+export const ImgSupprimerProfil = styled(ImgConnexion)`
+  width: 20%;
+  left: 15%;
+  top: 20%;
+`;
+
+export const ImgAvisGlobal = styled(ImgConnexion)`
   transform: scaleX(-1);
   width: 25%;
-  position: absolute;
-  left: 5%;
+  left: 3%;
   top: 25%;
 `;
 
-export const ImgImprevu = styled.Image`
+export const ImgImprevu = styled(ImgConnexion)`
   width: 20%;
-  position: absolute;
   right: 12%;
   top: 25%;
+`;
+
+// Besoin d'aide styles
+export const BesoinAideForm = styled.View`
+  background-color: white;
+  margin-top: 3%;
+  margin-bottom: 3%;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 30%;
+`;
+
+export const BesoinAideContainer = styled.View`
+  p {
+    margin-top: 2%;
+    margin-bottom: 2%;
+    color: #183255;
+  }
+`;
+
+export const AvisGlobalForm = styled.View`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 50%;
+  margin: 40px auto;
+
+  h1,
+  p {
+    text-align: center;
+    color: #183255;
+  }
+
+  details {
+    width: 85%;
+    background-color: white;
+    margin-top: 2%;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  summary {
+    font-size: 16px;
+    color: #183255;
+    cursor: pointer;
+    outline: none;
+
+    &::marker {
+      display: none;
+    }
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  button {
+    width: 35%;
+    padding: 6px 10px;
+    background-color: #183255;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 4%;
+
+    &:hover {
+      background-color: #0f1c2d;
+    }
+  }
+
+  span {
+    display: flex;
+    justify-content: center;
+    font-size: 12px;
+  }
+`;
+
+export const IconLabel = styled.View`
+  margin-top: 2%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #183255;
+
+  .icon {
+    margin-bottom: 2%;
+    color: #183255;
+  }
+`;
+
+export const SweepAnimation = styled(Animated.View)`
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: sweep 0.5s ease-in-out forwards;
+
+  @keyframes sweep {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;

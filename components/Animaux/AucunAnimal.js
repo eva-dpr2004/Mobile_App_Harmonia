@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
 function AucunAnimal() {
-  const noAnimalImage = require('../../assets/img/dog-cat.png'); // Local image
+  const noAnimalImage = require('../../assets/img/dog-cat.png'); 
 
   return (
     <View style={styles.container}>

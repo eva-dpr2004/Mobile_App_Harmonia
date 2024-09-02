@@ -11,10 +11,14 @@ function AccueilMain() {
     navigation.navigate('Inscription'); 
   };
 
+  const handleConnexionClick = () => {
+    navigation.navigate('Connexion'); 
+  };
+
   return (
     <View style={styles.AccueilMain}>
       <Image 
-        source={require('../../assets/img/logo4-removebg-preview.png')} 
+        source={require('../../assets/img/cat-removebg-preview.png')} 
         style={styles.HarmoniaLogo}
       />
       <View style={styles.AccueilContainer}>
@@ -29,20 +33,24 @@ function AccueilMain() {
             Surveillez leurs activités physiques dans un tableau répertoriant les sorties et découvrez la moyenne de temps pour chaque semaine !
           </Text>
           {!authState.isAuthenticated && (
-            <TouchableOpacity 
-              style={styles.StartButton} 
-              onPress={handleCommencerClick}
-            >
-              <Text style={styles.StartButtonText}>Commencer maintenant</Text>
-            </TouchableOpacity>
+            <View style={styles.ButtonsContainer}>
+              <TouchableOpacity 
+                style={styles.StartButton} 
+                onPress={handleCommencerClick}
+              >
+                <Text style={styles.StartButtonText}>Commencer maintenant</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.StartButton} 
+                onPress={handleConnexionClick}
+              >
+                <Text style={styles.StartButtonText}>Se connecter</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
         <View style={styles.ImagesColumn}>
           <View style={styles.ImageContainer}>
-            <Image 
-              source={require('../../assets/img/Vecteurs/pets_owner_playing.jpg')} 
-              style={styles.Image}
-            />
           </View>
         </View>
       </View>
@@ -53,7 +61,6 @@ function AccueilMain() {
 const styles = StyleSheet.create({
   AccueilMain: {
     flex: 1,
-    backgroundColor: '#F1F3F6',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -65,6 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   AccueilContainer: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -75,18 +83,26 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   MainTitle: {
+    color: 'rgb(24, 50, 87)',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
   Description: {
+    color: '#1f3b64',
     fontSize: 16,
     marginBottom: 10,
     textAlign: 'center',
   },
+  ButtonsContainer:{
+    display:'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap:'2%',
+  },
   StartButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#1f3b64',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -94,24 +110,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   StartButtonText: {
-    color: '#fff',
+    color: 'white',
     fontSize: 16,
-  },
-  ImagesColumn: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  ImageContainer: {
-    width: 200,
-    height: 200,
-  },
-  Image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    borderRadius: 10,
-  },
+  }
 });
 
 export default AccueilMain;
